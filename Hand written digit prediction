@@ -1,0 +1,93 @@
+mkdir handwritten-digit-classification
+cd handwritten-digit-classification
+# Handwritten Digit Classification Using Logistic Regression
+
+## Project Overview
+
+This project focuses on building a machine learning model to classify handwritten digits (0-9) using the MNIST dataset. The model is built using logistic regression, and the analysis and visualization are enhanced with `pandas`, `numpy`, and `matplotlib`.
+
+## Objectives
+
+1. Data Handling: Efficiently load and preprocess the MNIST dataset using pandas and numpy.
+2. Model Training: Train a logistic regression classifier to predict handwritten digits.
+3. Evaluation: Assess the model's performance using various metrics such as accuracy, confusion matrix, and classification report.
+4. Visualization: Visualize the digits, predictions, and confusion matrix to gain insights into the model's performance.
+
+## Installation
+
+To install the required packages, run:
+
+```bash
+pip install -r requirements.txt
+python digit_classification.py
+
+#### `requirements.txt`
+
+```plaintext
+numpy
+pandas
+scikit-learn
+matplotlib
+seaborn
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.datasets import fetch_openml
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+import seaborn as sns
+
+# Load the dataset
+mnist = fetch_openml('mnist_784', version=1)
+X, y = mnist["data"], mnist["target"]
+
+# Convert the target to integer
+y = y.astype(np.int8)
+
+# Convert to pandas DataFrame for easier handling
+X_df = pd.DataFrame(X)
+y_df = pd.Series(y, name='label')
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X_df, y_df, test_size=0.2, random_state=42)
+
+# Train a logistic regression model
+clf = LogisticRegression(max_iter=10000, solver='lbfgs', multi_class='auto')
+clf.fit(X_train, y_train)
+
+# Predict on the test set
+y_pred = clf.predict(X_test)
+
+# Evaluate the model
+accuracy = accuracy_score(y_test, y_pred)
+conf_matrix = confusion_matrix(y_test, y_pred)
+class_report = classification_report(y_test, y_pred)
+
+print(f"Accuracy: {accuracy}")
+print("Confusion Matrix:")
+print(conf_matrix)
+print("Classification Report:")
+print(class_report)
+
+# Function to plot a digit
+def plot_digit(data):
+    image = data.values.reshape(28, 28)
+    plt.imshow(image, cmap=plt.cm.gray)
+    plt.axis("off")
+
+# Visualize some predictions
+plt.figure(figsize=(10, 10))
+for i in range(25):
+    plt.subplot(5, 5, i + 1)
+    plot_digit(X_test.iloc[i])
+    plt.title(f"Pred: {y_pred[i]}\nTrue: {y_test.iloc[i]}")
+plt.show()
+
+# Visualize the confusion matrix
+plt.figure(figsize=(10, 8))
+sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.title('Confusion Matrix')
+plt.show()
